@@ -1,0 +1,11 @@
+main: dev.riley0122.splatoon.App
+name: Splatoon
+version: 0.1
+
+commands:
+  getWeapon:
+    description: Get a weapon
+    usage: /<command> <weapon_id>
+  listWeapons:
+    description: List all weapons
+    usage: /<command>
