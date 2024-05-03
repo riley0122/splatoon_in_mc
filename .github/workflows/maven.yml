@@ -1,0 +1,45 @@
+name: Release Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get version from pom.xml
+        id: get-version
+        run: echo "::set-output name=version::$(grep -oPm1 "(?<=<version>)[^<]+" pom.xml)"
+
+      - name: Get latest release version
+        id: get-latest-release
+        run: echo "::set-output name=latest_release::$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq -r '.tag_name')"
+
+      - name: Compare versions
+        id: compare-versions
+        run: echo ::set-output name=needs_release::$(test "${{ steps.get-version.outputs.version }}" != "${{ steps.get-latest-release.outputs.latest_release }}" && echo "true" || echo "false")
+
+  build-and-release:
+    needs: check-version
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-version.outputs.needs_release == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build project
+        run: mvn clean install
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/splatoon-${{ steps.get-version.outputs.version }}.jar
+          tag_name: ${{ steps.get-version.outputs.version }}
+          prerelease: ${{ contains(steps.get-version.outputs.version, 'SNAPSHOT') }}
+          token: ${{ secrets.GITHUB_TOKEN }}
