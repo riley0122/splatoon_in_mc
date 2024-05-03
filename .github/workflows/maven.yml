@@ -14,20 +14,29 @@ jobs:
 
       - name: Get version from pom.xml
         id: get-version
-        run: echo "::set-output name=version::$(grep -oPm1 "(?<=<version>)[^<]+" pom.xml)"
+        run: |
+          version=$(grep -oPm1 "(?<=<version>)[^<]+" pom.xml)
+          echo "version=$version" >> $GITHUB_STATE
 
       - name: Get latest release version
         id: get-latest-release
-        run: echo "::set-output name=latest_release::$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq -r '.tag_name')"
+        run: |
+          latest_release=$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq -r '.tag_name')
+          echo "latest_release=$latest_release" >> $GITHUB_STATE
 
       - name: Compare versions
         id: compare-versions
-        run: echo ::set-output name=needs_release::$(test "${{ steps.get-version.outputs.version }}" != "${{ steps.get-latest-release.outputs.latest_release }}" && echo "true" || echo "false")
+        run: |
+          if [ "${{ env.version }}" != "${{ env.latest_release }}" ]; then
+            echo "needs_release=true" >> $GITHUB_STATE
+          else
+            echo "needs_release=false" >> $GITHUB_STATE
+          fi
 
   build-and-release:
     needs: check-version
     runs-on: ubuntu-latest
-    if: ${{ needs.check-version.outputs.needs_release }}
+    if: ${{ needs.check-version.outputs.needs_release == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -39,7 +48,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            target/splatoon-${{ steps.get-version.outputs.version }}.jar
-          tag_name: ${{ steps.get-version.outputs.version }}
-          prerelease: ${{ contains(steps.get-version.outputs.version, 'SNAPSHOT') }}
+            target/splatoon-${{ env.version }}.jar
+          tag_name: ${{ env.version }}
+          prerelease: ${{ contains(env.version, 'SNAPSHOT') }}
           token: ${{ secrets.GITHUB_TOKEN }}
