@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs: 
       needs_release: ${{steps.compare-versions.outputs.needs_release}}
+      version: ${{ steps.get-version.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -59,7 +60,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            target/splatoon-${{ env.version }}.jar
-          tag_name: ${{ env.version }}
-          prerelease: ${{ contains(env.version, 'SNAPSHOT') }}
+            target/splatoon-${{ needs.check-version.outputs.version }}.jar
+          tag_name: ${{ needs.check-version.outputs.version }}
+          prerelease: ${{ contains(needs.check-version.outputs.version, 'SNAPSHOT') }}
           token: ${{ secrets.GITHUB_TOKEN }}
