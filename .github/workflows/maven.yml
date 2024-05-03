@@ -31,10 +31,10 @@ jobs:
         run: |
           if [ "${{ env.version }}" != "${{ env.latest_release }}" ]; then
             echo "New release should be made"
-            echo "needs_release=true" >> $GITHUB_STATE
+            echo "needs_release=true" >> $GITHUB_OUTPUT
           else
             echo "New release should not be made"
-            echo "needs_release=false" >> $GITHUB_STATE
+            echo "needs_release=false" >> $GITHUB_OUTPUT
           fi
 
   build-and-release:
