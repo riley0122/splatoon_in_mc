@@ -41,6 +41,8 @@ jobs:
           fi
 
   build-and-release:
+    permissions:
+      contents: write
     needs: check-version
     runs-on: ubuntu-latest
     if: ${{ needs.check-version.outputs.needs_release }}
