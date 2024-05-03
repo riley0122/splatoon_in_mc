@@ -16,27 +16,31 @@ jobs:
         id: get-version
         run: |
           version=$(grep -oPm1 "(?<=<version>)[^<]+" pom.xml)
+          echo "Found version $version"
           echo "version=$version" >> $GITHUB_STATE
 
       - name: Get latest release version
         id: get-latest-release
         run: |
           latest_release=$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq -r '.tag_name')
+          echo "Latest version $latest_release"
           echo "latest_release=$latest_release" >> $GITHUB_STATE
 
       - name: Compare versions
         id: compare-versions
         run: |
           if [ "${{ env.version }}" != "${{ env.latest_release }}" ]; then
+            echo "New release should be made"
             echo "needs_release=true" >> $GITHUB_STATE
           else
+            echo "New release should not be made"
             echo "needs_release=false" >> $GITHUB_STATE
           fi
 
   build-and-release:
     needs: check-version
     runs-on: ubuntu-latest
-    if: ${{ needs.check-version.outputs.needs_release == 'true' }}
+    if: ${{ needs.check-version.outputs.needs_release }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
