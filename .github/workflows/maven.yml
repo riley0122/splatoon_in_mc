@@ -63,4 +63,3 @@ jobs:
             target/splatoon-${{ needs.check-version.outputs.version }}.jar
           tag_name: ${{ needs.check-version.outputs.version }}
           prerelease: ${{ contains(needs.check-version.outputs.version, 'SNAPSHOT') }}
-          token: ${{ secrets.GITHUB_TOKEN }}
