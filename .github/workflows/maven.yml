@@ -8,6 +8,8 @@ on:
 jobs:
   check-version:
     runs-on: ubuntu-latest
+    outputs: 
+      needs_release: ${{steps.compare-versions.outputs.needs_release}}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -40,7 +42,7 @@ jobs:
   build-and-release:
     needs: check-version
     runs-on: ubuntu-latest
-    if: ${{ needs.check-version.outputs.needs_release }}
+    if: ${{ jobs.check-version.outputs.needs_release }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
