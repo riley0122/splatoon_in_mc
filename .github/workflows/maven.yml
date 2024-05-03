@@ -40,7 +40,7 @@ jobs:
   build-and-release:
     needs: check-version
     runs-on: ubuntu-latest
-    if: ${{ check-version.outputs.needs_release }}
+    if: ${{ needs.check-version.outputs.needs_release }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
