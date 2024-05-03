@@ -29,7 +29,7 @@ public class CommandGetWeapon implements CommandExecutor {
                     ItemMeta meta = weapon.getItemMeta();
 
                     meta.setDisplayName(W.name);
-                    meta.setCustomModelData(i);
+                    meta.setCustomModelData(i + 1);
 
                     weapon.setItemMeta(meta);
 
