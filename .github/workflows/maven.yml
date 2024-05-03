@@ -27,7 +27,7 @@ jobs:
   build-and-release:
     needs: check-version
     runs-on: ubuntu-latest
-    if: ${{ needs.check-version.outputs.needs_release == 'true' }}
+    if: ${{ needs.check-version.outputs.needs_release }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
